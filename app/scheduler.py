@@ -127,3 +127,69 @@ def priority_scheduling(jobs):
         pending_jobs.remove(job)
 
     return results
+
+from collections import deque
+
+
+def round_robin(jobs, time_quantum):
+    if time_quantum <= 0:
+        raise ValueError("Time quantum must be positive")
+
+    pending_jobs = sorted(
+        jobs, key=lambda job: job.arrival_time
+    )
+
+    ready_queue = deque()
+    remaining_time = {
+        job.job_id: job.burst_time for job in pending_jobs
+    }
+
+    current_time = 0
+    next_job = 0
+    results = []
+
+    while ready_queue or next_job < len(pending_jobs):
+
+        if not ready_queue and current_time < pending_jobs[next_job].arrival_time:
+            current_time = pending_jobs[next_job].arrival_time
+
+        while (
+            next_job < len(pending_jobs)
+            and pending_jobs[next_job].arrival_time <= current_time
+        ):
+            ready_queue.append(pending_jobs[next_job])
+            next_job += 1
+
+        job = ready_queue.popleft()
+
+        start_time = current_time
+        execution_time = min(
+            time_quantum, remaining_time[job.job_id]
+        )
+
+        current_time += execution_time
+        remaining_time[job.job_id] -= execution_time
+
+        while (
+            next_job < len(pending_jobs)
+            and pending_jobs[next_job].arrival_time <= current_time
+        ):
+            ready_queue.append(pending_jobs[next_job])
+            next_job += 1
+
+        if remaining_time[job.job_id] > 0:
+            ready_queue.append(job)
+        else:
+            completion_time = current_time
+            turnaround_time = completion_time - job.arrival_time
+            waiting_time = turnaround_time - job.burst_time
+
+            results.append({
+                "job_id": job.job_id,
+                "start_time": start_time,
+                "completion_time": completion_time,
+                "turnaround_time": turnaround_time,
+                "waiting_time": waiting_time,
+            })
+
+    return results
