@@ -42,3 +42,18 @@ def test_round_robin_rejects_invalid_quantum():
         assert False, "Expected ValueError"
     except ValueError:
         pass
+
+def test_round_robin_preserves_first_start_time():
+    jobs = [
+        Job("J1", "First", 5),
+        Job("J2", "Second", 3),
+    ]
+
+    results = round_robin(jobs, time_quantum=2)
+
+    results_by_id = {
+        job["job_id"]: job for job in results
+    }
+
+    assert results_by_id["J1"]["start_time"] == 0
+    assert results_by_id["J2"]["start_time"] == 2
