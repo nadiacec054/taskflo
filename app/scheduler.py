@@ -131,7 +131,7 @@ def priority_scheduling(jobs):
 from collections import deque
 
 
-def round_robin(jobs, time_quantum=2):
+def round_robin(jobs, time_quantum=2, return_history=False):
     if time_quantum <= 0:
         raise ValueError("Time quantum must be positive")
 
@@ -222,4 +222,6 @@ def round_robin(jobs, time_quantum=2):
                 "waiting_time": waiting_time,
             })
 
+    if return_history:
+        return results, execution_history
     return results

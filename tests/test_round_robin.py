@@ -57,3 +57,24 @@ def test_round_robin_preserves_first_start_time():
 
     assert results_by_id["J1"]["start_time"] == 0
     assert results_by_id["J2"]["start_time"] == 2
+
+def test_round_robin_returns_execution_history():
+    jobs = [
+        Job("J1", "First", 5),
+        Job("J2", "Second", 3),
+    ]
+
+    results, history = round_robin(
+        jobs,
+        time_quantum=2,
+        return_history=True,
+    )
+
+    assert len(results) == 2
+    assert history == [
+        {"job_id": "J1", "start": 0, "end": 2},
+        {"job_id": "J2", "start": 2, "end": 4},
+        {"job_id": "J1", "start": 4, "end": 6},
+        {"job_id": "J2", "start": 6, "end": 7},
+        {"job_id": "J1", "start": 7, "end": 8},
+    ]
